@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navbar, Container, Nav } from 'react-bootstrap';
+import { Navbar, Container, Nav, Button } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 
 const AppNavbar: React.FC = () => {
@@ -17,23 +17,30 @@ const AppNavbar: React.FC = () => {
       <Container>
         <Navbar.Brand as={Link} to="/">Travel Agency</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse>
+        <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="ms-auto">
-            {!token && (
+
+            {!token ? (
               <>
                 <Nav.Link as={Link} to="/login">登入</Nav.Link>
                 <Nav.Link as={Link} to="/register">註冊</Nav.Link>
               </>
-            )}
-            {token && (
+            ) : (
               <>
-                <Nav.Link as={Link} to="/hotels">酒店清單</Nav.Link>
+                <Nav.Link as={Link} to="/">酒店清單</Nav.Link>
+                <Nav.Link as={Link} to="/bookings">我的預約</Nav.Link>
+                <Nav.Link as={Link} to="/profile">個人資料</Nav.Link>
+
                 {role === 'operator' && (
                   <Nav.Link as={Link} to="/dashboard">營運管理</Nav.Link>
                 )}
-                <Nav.Link onClick={handleLogout}>登出</Nav.Link>
+
+                <Button variant="outline-light" className="ms-2" onClick={handleLogout}>
+                  登出
+                </Button>
               </>
             )}
+
           </Nav>
         </Navbar.Collapse>
       </Container>
