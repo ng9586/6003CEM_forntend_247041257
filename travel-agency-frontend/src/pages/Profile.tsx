@@ -60,43 +60,49 @@ const Profile: React.FC = () => {
 
   // 用戶名更新
   const handleUsernameUpdate = () => {
-    axios
-      .put(
-        `${API_BASE}/users/me/name`,
-        { username: newUsername },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      .then(() => {
-        alert('用戶名已更新');
-        setProfile((prev) => prev && { ...prev, username: newUsername });
-      })
-      .catch(() => alert('更新失敗'));
-  };
+  axios
+    .put(
+      `${API_BASE}/users/me/name`,
+      { username: newUsername },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+    .then((res) => {
+      alert('用戶名已更新');
+      setProfile(res.data); // ✅ 用最新用戶資料覆蓋
+      setNewUsername(res.data.username); // ✅ 同步 input 欄位
+    })
+    .catch(() => alert('更新失敗'));
+};
+
 
   // 上傳頭像
   const handleAvatarUpload = () => {
-    if (!avatarFile) return;
+  if (!avatarFile) return;
 
-    const formData = new FormData();
-    formData.append('avatar', avatarFile);
+  const formData = new FormData();
+  formData.append('avatar', avatarFile);
 
-    axios
-      .put(`${API_BASE}/users/me/avatar`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      })
-      .then((res) => {
-        alert('頭像已更新');
-        // 更新 profile 中 avatarUrl，並更新時間戳，強制刷新圖片
-        setProfile((prev) => prev && { ...prev, avatarUrl: res.data.avatarUrl });
-        setAvatarTimestamp(Date.now());
-        setAvatarFile(null);
-        setPreviewUrl(null);
-      })
-      .catch(() => alert('頭像上傳失敗'));
-  };
+  axios
+    .put(`${API_BASE}/users/me/avatar`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    .then((res) => {
+      alert('頭像已更新');
+      setProfile(res.data); // ✅ 更新狀態
+      setAvatarTimestamp(Date.now()); // ✅ 強制刷新圖片
+      setAvatarFile(null);
+      setPreviewUrl(null);
+    })
+    .catch(() => alert('頭像上傳失敗'));
+};
+
 
   if (!profile) return <p>載入中...</p>;
 
