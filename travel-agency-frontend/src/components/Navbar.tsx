@@ -1,10 +1,9 @@
-// src/components/AppNavbar.tsx
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Navbar, Container, Nav, Button, Image } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 
-const API_BASE = import.meta.env.VITE_IMAGE_BASE_URL.replace(/\/api$/, '');
+const API_BASE = import.meta.env.VITE_IMAGE_BASE_URL;
 
 const AppNavbar: React.FC = () => {
   const navigate = useNavigate();
@@ -12,26 +11,11 @@ const AppNavbar: React.FC = () => {
   const role = localStorage.getItem('role');
   const { profile } = useUser();
 
-  const [avatarTimestamp, setAvatarTimestamp] = useState(Date.now());
-
-  useEffect(() => {
-    if (profile?.avatarUrl) setAvatarTimestamp(Date.now());
-  }, [profile?.avatarUrl]);
-
   const handleLogout = () => {
     localStorage.clear();
     navigate('/login');
     window.location.reload();
   };
-
-  const avatarSrc = profile?.avatarUrl
-  ? `${API_BASE}${profile.avatarUrl.startsWith('/') ? '' : '/'}${profile.avatarUrl}?t=${avatarTimestamp}`
-  : 'https://via.placeholder.com/40';
-
-console.log("🤖 profile.avatarUrl =", profile?.avatarUrl);
-console.log("🧠 avatarSrc =", avatarSrc);
-
-
 
   return (
     <Navbar bg="dark" variant="dark" expand="lg">
@@ -54,7 +38,11 @@ console.log("🧠 avatarSrc =", avatarSrc);
                 {profile && (
                   <div className="d-flex align-items-center mx-2">
                     <Image
-                      src={avatarSrc}
+                      src={
+                        profile.avatarUrl
+                          ? `${API_BASE}${profile.avatarUrl}?t=${Date.now()}`
+                          : 'https://via.placeholder.com/40'
+                      }
                       alt="Avatar"
                       roundedCircle
                       width={40}
@@ -64,9 +52,7 @@ console.log("🧠 avatarSrc =", avatarSrc);
                     <span className="text-white ms-2">{profile.username}</span>
                   </div>
                 )}
-                <Button variant="outline-light" className="ms-2" onClick={handleLogout}>
-                  登出
-                </Button>
+                <Button variant="outline-light" className="ms-2" onClick={handleLogout}>登出</Button>
               </>
             )}
           </Nav>

@@ -9,34 +9,18 @@ const Profile: React.FC = () => {
   const { profile, setProfile } = useUser();
   const [newUsername, setNewUsername] = useState(profile?.username || '');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!profile) return <p>載入中...</p>;
 
-  const API_ROOT = API_BASE.replace(/\/api$/, '');
-  const avatarSrc = avatarPreview || (profile.avatarUrl
-    ? `${API_ROOT}${profile.avatarUrl}?t=${Date.now()}`
-    : 'https://via.placeholder.com/100');
-
-console.log("🤖 profile.avatarUrl =", profile?.avatarUrl);
-console.log("🧠 avatarSrc =", avatarSrc);
-
   const handleUsernameUpdate = () => {
     const token = localStorage.getItem('token');
     axios
-      .put(
-        `${API_BASE}/users/me/name`,
-        { username: newUsername },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
-      .then((res) => {
-        setProfile(res.data);
-        alert('✅ 用戶名已更新');
+      .put(`${API_BASE}/users/me/name`, { username: newUsername }, {
+        headers: { Authorization: `Bearer ${token}` },
       })
-      .catch(() => alert('❌ 用戶名更新失敗'));
+      .then(res => setProfile(res.data))
+      .catch(() => alert('更新失敗'));
   };
 
   const handleAvatarUpload = () => {
@@ -52,13 +36,8 @@ console.log("🧠 avatarSrc =", avatarSrc);
           'Content-Type': 'multipart/form-data',
         },
       })
-      .then((res) => {
-        setProfile(res.data);
-        setAvatarFile(null);
-        setAvatarPreview(null);
-        alert('✅ 頭像上傳成功');
-      })
-      .catch(() => alert('❌ 頭像上傳失敗'));
+      .then(res => setProfile(res.data))
+      .catch(() => alert('上傳失敗'));
   };
 
   return (
@@ -79,41 +58,30 @@ console.log("🧠 avatarSrc =", avatarSrc);
           }}
         >
           <img
-            src={avatarSrc}
+            src={
+              profile.avatarUrl
+                ? `${API_BASE}${profile.avatarUrl}?t=${Date.now()}`
+                : 'https://via.placeholder.com/100'
+            }
             alt="Avatar"
             className="rounded-circle"
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         </div>
-
         <input
           type="file"
           accept="image/*"
           ref={fileInputRef}
           style={{ display: 'none' }}
-          onChange={(e) => {
-            const file = e.target.files?.[0] || null;
-            setAvatarFile(file);
-            if (file) {
-              setAvatarPreview(URL.createObjectURL(file));
-            } else {
-              setAvatarPreview(null);
-            }
-          }}
+          onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
         />
-
         <div className="mb-3">
-          <label htmlFor="usernameInput" className="form-label">
-            用戶名
-          </label>
+          <label className="form-label">用戶名</label>
           <input
             type="text"
             className="form-control"
-            id="usernameInput"
-            name="username"
             value={newUsername}
             onChange={(e) => setNewUsername(e.target.value)}
-            autoComplete="username"
           />
           <button className="btn btn-primary mt-2" onClick={handleUsernameUpdate}>
             更新用戶名

@@ -1,51 +1,48 @@
 // src/contexts/UserContext.tsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_IMAGE_BASE_URL;
-
-interface UserProfile {
-  username: string;
+export interface ProfileData {
   email: string;
+  username: string;
   avatarUrl: string;
   role: string;
+  avatarUpdatedAt?: number; // 加呢個欄位
 }
 
 interface UserContextType {
-  profile: UserProfile | null;
-  setProfile: (profile: UserProfile | null) => void;
+  profile: ProfileData | null;
+  setProfile: React.Dispatch<React.SetStateAction<ProfileData | null>>;
 }
 
-const UserContext = createContext<UserContextType>({
-  profile: null,
-  setProfile: () => {},
-});
-
-export const useUser = () => useContext(UserContext);
+const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  // 初始化時從 localStorage 讀 profile
+  const [profile, setProfile] = useState<ProfileData | null>(() => {
+    const storedProfile = localStorage.getItem('profile');
+    return storedProfile ? JSON.parse(storedProfile) : null;
+  });
 
+  // useEffect 監聽 profile 變化，同步更新 localStorage
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
-    axios
-      .get(`${API_BASE}/users/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        setProfile(res.data);
-      })
-      .catch(() => {
-        localStorage.clear(); // 防止錯誤 token 繼續存在
-        setProfile(null);
-      });
-  }, []);
+    if (profile) {
+      localStorage.setItem('profile', JSON.stringify(profile));
+    } else {
+      localStorage.removeItem('profile'); // 登出時移除
+    }
+  }, [profile]);
 
   return (
     <UserContext.Provider value={{ profile, setProfile }}>
       {children}
     </UserContext.Provider>
   );
+};
+
+export const useUser = (): UserContextType => {
+  const context = useContext(UserContext);
+  if (!context) {
+    throw new Error('useUser must be used within UserProvider');
+  }
+  return context;
 };

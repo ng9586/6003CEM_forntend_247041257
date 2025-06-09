@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://fictional-space-pancake-q744vr6v69643wj4-3000.app.github.dev',
+        target: 'http://127.0.0.1:3000',
         changeOrigin: true,
         // rewrite: (path) => path.replace(/^\/api/, ''),
       },
