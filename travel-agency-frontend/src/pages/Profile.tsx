@@ -3,7 +3,7 @@ import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import { useUser } from '../contexts/UserContext';
 
-const API_BASE = import.meta.env.VITE_IMAGE_BASE_URL;
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 const Profile: React.FC = () => {
   const { profile, setProfile } = useUser();

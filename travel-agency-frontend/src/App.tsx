@@ -2,17 +2,17 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import Register from './pages/Register';
 import Login from './pages/Login';
-import Hotels from './pages/Hotels';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Bookings from './pages/Booking';
 import Navbar from './components/Navbar';
 import { UserProvider, useUser } from './contexts/UserContext';
 import axios from 'axios';
+import AppContent from './components/AppContent';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
-function AppContent() {
+function AppContentWrapper() {
   const { setProfile } = useUser();
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -44,7 +44,7 @@ function AppContent() {
     <>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Hotels />} />
+        <Route path="/" element={<AppContent />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
@@ -59,7 +59,7 @@ function App() {
   return (
     <UserProvider>
       <BrowserRouter>
-        <AppContent />
+        <AppContentWrapper />
       </BrowserRouter>
     </UserProvider>
   );
