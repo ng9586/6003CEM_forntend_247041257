@@ -1,4 +1,6 @@
+// HotelList.tsx
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export interface Hotel {
   code: number;
@@ -14,6 +16,8 @@ interface HotelListProps {
 }
 
 const HotelList: React.FC<HotelListProps> = ({ hotels }) => {
+  const navigate = useNavigate();
+
   if (hotels.length === 0) return <p>無酒店資料</p>;
 
   return (
@@ -21,12 +25,15 @@ const HotelList: React.FC<HotelListProps> = ({ hotels }) => {
       {hotels.map((hotel) => (
         <div
           key={hotel.code}
+          onClick={() => navigate(`/hotel/${hotel.code}`)}
           style={{
             border: '1px solid #ccc',
             borderRadius: 8,
             padding: 12,
             width: 220,
+            cursor: 'pointer',
             boxShadow: '2px 2px 6px rgba(0,0,0,0.1)',
+            transition: 'transform 0.2s',
           }}
         >
           {hotel.thumbnail ? (

@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import HotelSearchBar from '../pages/HotelSearchBar';
 import HotelList from '../pages/HotelList';
 import type { Hotel } from '../pages/HotelList';
-
 
 const AppContent: React.FC = () => {
   const [hotels, setHotels] = useState<Hotel[]>([]);
@@ -49,14 +48,11 @@ const AppContent: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    fetchHotels('香港', '2025-07-01', '2025-07-03');
-  }, []);
-
   return (
     <div style={{ padding: 20 }}>
       <h1>酒店搜尋平台</h1>
       <HotelSearchBar onSearch={fetchHotels} />
+
       {loading && (
         <div style={{ margin: '20px 0' }}>
           <div
@@ -72,8 +68,13 @@ const AppContent: React.FC = () => {
           />
         </div>
       )}
+
       {error && <p style={{ color: 'red' }}>錯誤：{error}</p>}
-      {!loading && !error && <HotelList hotels={hotels} />}
+
+      {!loading && !error && hotels.length > 0 && <HotelList hotels={hotels} />}
+      {!loading && !error && hotels.length === 0 && (
+        <p style={{ color: '#555' }}>請輸入搜尋條件後再搜尋酒店。</p>
+      )}
 
       <style>{`
         @keyframes spin {
