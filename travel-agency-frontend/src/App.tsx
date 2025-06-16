@@ -10,6 +10,8 @@ import { UserProvider, useUser } from './contexts/UserContext';
 import axios from 'axios';
 import AppContent from './components/AppContent';
 import HotelDetail from './pages/HotelDetail';  // 新增引入 HotelDetail
+import LocalHotelListPage from './pages/LocalHotelListPage';
+import LocalHotelDetail from './components/localHotel/LocalHotelDetail';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
@@ -49,6 +51,8 @@ function AppContentWrapper() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/localHotels" element={<LocalHotelListPage />} /> 
+         <Route path="/localHotels/:id" element={<LocalHotelDetail />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/bookings" element={<Bookings />} />
         {/* 新增酒店詳細頁路由 */}

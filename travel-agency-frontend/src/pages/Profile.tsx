@@ -1,5 +1,4 @@
-// src/pages/Profile.tsx
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { useUser } from '../contexts/UserContext';
 
@@ -9,7 +8,15 @@ const Profile: React.FC = () => {
   const { profile, setProfile } = useUser();
   const [newUsername, setNewUsername] = useState(profile?.username || '');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // 當 profile.avatarUrl 改變時，清除本地預覽
+    if (profile?.avatarUrl) {
+      setAvatarPreview(null);
+    }
+  }, [profile?.avatarUrl]);
 
   if (!profile) return <p>載入中...</p>;
 
@@ -21,6 +28,18 @@ const Profile: React.FC = () => {
       })
       .then(res => setProfile(res.data))
       .catch(() => alert('更新失敗'));
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setAvatarFile(file);
+
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      setAvatarPreview(previewUrl);
+    } else {
+      setAvatarPreview(null);
+    }
   };
 
   const handleAvatarUpload = () => {
@@ -36,7 +55,11 @@ const Profile: React.FC = () => {
           'Content-Type': 'multipart/form-data',
         },
       })
-      .then(res => setProfile(res.data))
+      .then(res => {
+        setProfile(res.data);
+        setAvatarFile(null);
+        setAvatarPreview(null);
+      })
       .catch(() => alert('上傳失敗'));
   };
 
@@ -59,9 +82,11 @@ const Profile: React.FC = () => {
         >
           <img
             src={
-              profile.avatarUrl
-                ? `${API_BASE}${profile.avatarUrl}?t=${Date.now()}`
-                : 'https://via.placeholder.com/100'
+              avatarPreview
+                ? avatarPreview
+                : profile.avatarUrl
+                  ? `${API_BASE}${profile.avatarUrl}?t=${Date.now()}`
+                  : 'https://via.placeholder.com/100'
             }
             alt="Avatar"
             className="rounded-circle"
@@ -73,7 +98,7 @@ const Profile: React.FC = () => {
           accept="image/*"
           ref={fileInputRef}
           style={{ display: 'none' }}
-          onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
+          onChange={handleAvatarChange}
         />
         <div className="mb-3">
           <label className="form-label">用戶名</label>

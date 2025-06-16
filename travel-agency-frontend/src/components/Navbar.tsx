@@ -3,7 +3,7 @@ import { Navbar, Container, Nav, Button, Image } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 
-const API_BASE = import.meta.env.VITE_IMAGE_BASE_URL;
+const API_BASE = import.meta.env.VITE_IMAGE_BASE_URL || '';
 
 const AppNavbar: React.FC = () => {
   const navigate = useNavigate();
@@ -32,6 +32,7 @@ const AppNavbar: React.FC = () => {
             ) : (
               <>
                 <Nav.Link as={Link} to="/">酒店清單</Nav.Link>
+                <Nav.Link as={Link} to="/localHotels">本地酒店清單</Nav.Link> {/* 新增本地酒店清單 */}
                 <Nav.Link as={Link} to="/bookings">我的預約</Nav.Link>
                 <Nav.Link as={Link} to="/profile">個人資料</Nav.Link>
                 {role === 'operator' && <Nav.Link as={Link} to="/dashboard">營運管理</Nav.Link>}
