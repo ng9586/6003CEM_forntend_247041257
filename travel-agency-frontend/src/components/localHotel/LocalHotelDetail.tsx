@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchLocalHotelById } from '../../services/localHotelApi';
+import axios from 'axios';
 import type { AxiosResponse } from 'axios';
 
 interface Hotel {
@@ -10,9 +11,11 @@ interface Hotel {
   price: number;
   description?: string;
   imageFilename?: string;
-  // 如果你有多張圖片，可以加 images: string[] 或類似
-  images?: string[]; 
+  images?: string[];
 }
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/api';
+const IMAGE_BASE = import.meta.env.VITE_IMAGE_BASE_URL || `${API_BASE}/uploads`;
 
 const LocalHotelDetail: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
@@ -20,6 +23,9 @@ const LocalHotelDetail: React.FC = () => {
   const [hotel, setHotel] = useState<Hotel | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [stayDays, setStayDays] = useState<number>(1);
+  const [checkInDate, setCheckInDate] = useState<string>('');
+  const [bookingMessage, setBookingMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -39,17 +45,57 @@ const LocalHotelDetail: React.FC = () => {
     }
   }, [id]);
 
+  const handleBooking = async () => {
+    if (!hotel) return;
+
+    if (!checkInDate) {
+      setBookingMessage('請選擇入住日期');
+      return;
+    }
+
+    if (stayDays <= 0) {
+      setBookingMessage('入住天數必須大於 0');
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setBookingMessage('請先登入才能預約');
+      return;
+    }
+
+    try {
+      await axios.post(
+        `${API_BASE}/bookings`,
+        {
+          hotelId: hotel._id,
+          hotelSource: 'local', // 標示本地酒店
+          checkInDate,
+          stayDays,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      setBookingMessage('預約成功！即將跳轉...');
+      setTimeout(() => {
+        navigate('/'); // 可改成你想跳轉嘅路徑
+      }, 2000);
+    } catch (error: any) {
+      const msg = error.response?.data?.message || '預約失敗，請稍後再試';
+      setBookingMessage(msg);
+    }
+  };
+
   if (loading) return <p>載入中...</p>;
   if (error) return <p>{error}</p>;
   if (!hotel) return <p>找唔到酒店資料</p>;
 
-  const baseUrl = import.meta.env.VITE_API_BASE_URL.replace(/\/api\/?$/, '');
-
-  // 圖片來源：優先用 images 陣列，無就 fallback 單張 imageFilename
   const imageUrls = hotel.images && hotel.images.length > 0
-    ? hotel.images.map(imgPath => `${baseUrl}/uploads/${imgPath}?t=${Date.now()}`)
+    ? hotel.images.map(imgPath => `${IMAGE_BASE}/uploads/${imgPath}?t=${Date.now()}`)
     : hotel.imageFilename
-      ? [`${baseUrl}/uploads/${hotel.imageFilename}?t=${Date.now()}`]
+      ? [`${IMAGE_BASE}/uploads/${hotel.imageFilename}?t=${Date.now()}`]
       : [];
 
   return (
@@ -86,6 +132,35 @@ const LocalHotelDetail: React.FC = () => {
           ))}
         </div>
       )}
+
+      <div style={{ marginTop: 24, border: '1px solid #ccc', padding: 16, borderRadius: 8, maxWidth: 300 }}>
+        <h3>預約入住</h3>
+
+        <label htmlFor="checkInDate">入住日期：</label>
+        <input
+          id="checkInDate"
+          type="date"
+          value={checkInDate}
+          onChange={(e) => setCheckInDate(e.target.value)}
+          style={{ width: '100%', marginTop: 8, marginBottom: 12 }}
+        />
+
+        <label htmlFor="stayDays">入住天數：</label>
+        <input
+          id="stayDays"
+          type="number"
+          min={1}
+          value={stayDays}
+          onChange={(e) => setStayDays(Number(e.target.value))}
+          style={{ width: '100%', marginBottom: 12 }}
+        />
+
+        <button onClick={handleBooking} style={{ width: '100%', padding: '8px 0' }}>
+          預約
+        </button>
+
+        {bookingMessage && <p style={{ marginTop: 12 }}>{bookingMessage}</p>}
+      </div>
     </div>
   );
 };
