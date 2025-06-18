@@ -12,6 +12,7 @@ import AppContent from './components/AppContent';
 import HotelDetail from './pages/HotelDetail';  // 新增引入 HotelDetail
 import LocalHotelListPage from './pages/LocalHotelListPage';
 import LocalHotelDetail from './components/localHotel/LocalHotelDetail';
+import FavoritesPage from './pages/FavoritesPage';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
@@ -57,6 +58,7 @@ function AppContentWrapper() {
         <Route path="/bookings" element={<Bookings />} />
         {/* 新增酒店詳細頁路由 */}
         <Route path="/hotel/:hotelCode" element={<HotelDetail />} />
+        <Route path="/favorites" element={<FavoritesPage />} />
       </Routes>
     </>
   );

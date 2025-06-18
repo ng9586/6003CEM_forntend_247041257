@@ -24,17 +24,20 @@ interface Booking {
   stayDays: number | null;
 }
 
+const predefinedExternalHotels: Hotel[] = [
+  { _id: 'ext1', name: '外部酒店 A', source: 'external' },
+  { _id: 'ext2', name: '外部酒店 B', source: 'external' },
+];
+
 const Booking: React.FC = () => {
   const [localHotels, setLocalHotels] = useState<Hotel[]>([]);
-  const [externalHotels, setExternalHotels] = useState<Hotel[]>([]);
   const [myBookings, setMyBookings] = useState<Booking[]>([]);
+
   const [selectedHotelId, setSelectedHotelId] = useState('');
-  const [selectedHotelSource, setSelectedHotelSource] = useState<'local' | 'external'>('local');
   const [checkInDate, setCheckInDate] = useState('');
   const [stayDays, setStayDays] = useState(1);
+
   const [message, setMessage] = useState<string | null>(null);
-  const [searchKeyword, setSearchKeyword] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
 
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
@@ -46,7 +49,7 @@ const Booking: React.FC = () => {
     }
 
     axios.get(`${API_BASE}/localHotels`)
-      .then((res) => {
+      .then(res => {
         const hotels = res.data.map((h: any) => ({ ...h, source: 'local' as const }));
         setLocalHotels(hotels);
       })
@@ -55,41 +58,19 @@ const Booking: React.FC = () => {
     fetchMyBookings();
   }, [token]);
 
-  const searchExternalHotels = () => {
-    if (!searchKeyword.trim()) {
-      setMessage('請輸入搜尋關鍵字');
-      return;
-    }
-    setIsSearching(true);
-    setMessage(null);
-
-    axios.get(`${API_BASE}/hotels/search?keyword=${encodeURIComponent(searchKeyword)}`)
-      .then((res) => {
-        const hotels = res.data.map((h: any) => ({
-          _id: h.hotelCode || h._id,
-          name: h.name,
-          source: 'external' as const,
-        }));
-        setExternalHotels(hotels);
-      })
-      .catch(() => setMessage('搜尋外部酒店失敗'))
-      .finally(() => setIsSearching(false));
-  };
-
   const fetchMyBookings = () => {
     if (!token) return;
     axios.get(`${API_BASE}/bookings/my`, {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((res) => setMyBookings(res.data))
+      .then(res => setMyBookings(res.data))
       .catch(() => setMessage('載入預約紀錄失敗'));
   };
 
+  const combinedHotels = [...localHotels, ...predefinedExternalHotels];
+
   const handleHotelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value;
-    const [id, source] = val.split('|');
-    setSelectedHotelId(id);
-    setSelectedHotelSource(source as 'local' | 'external');
+    setSelectedHotelId(e.target.value);
   };
 
   const handleBooking = async () => {
@@ -102,10 +83,16 @@ const Booking: React.FC = () => {
       return;
     }
 
+    const selectedHotel = combinedHotels.find(h => h._id === selectedHotelId);
+    if (!selectedHotel) {
+      setMessage('選擇的酒店不存在');
+      return;
+    }
+
     const duplicate = myBookings.some(
       (b) =>
         b.hotelId === selectedHotelId &&
-        b.hotelSource === selectedHotelSource &&
+        b.hotelSource === selectedHotel.source &&
         new Date(b.checkInDate ?? '').toDateString() === new Date(checkInDate).toDateString()
     );
 
@@ -119,7 +106,7 @@ const Booking: React.FC = () => {
         `${API_BASE}/bookings`,
         {
           hotelId: selectedHotelId,
-          hotelSource: selectedHotelSource,
+          hotelSource: selectedHotel.source,
           checkInDate,
           stayDays,
         },
@@ -162,24 +149,9 @@ const Booking: React.FC = () => {
     }
   };
 
-  // 合併酒店列表
-  const combinedHotels = [...localHotels, ...externalHotels];
-
-  // 排序預約紀錄，local 先顯示
-  const sortedBookings = [...myBookings].sort((a, b) => {
-    if (a.hotelSource === b.hotelSource) return 0;
-    return a.hotelSource === 'local' ? -1 : 1;
-  });
-
-  // 根據預約資料的 hotelId 和 hotelSource 從酒店列表取得酒店名稱
   const getHotelName = (booking: Booking) => {
-    if (booking.hotelSource === 'local') {
-      const hotel = localHotels.find(h => h._id === booking.hotelId);
-      return hotel?.name || '本地酒店';
-    } else {
-      const hotel = externalHotels.find(h => h._id === booking.hotelId);
-      return hotel?.name || '外部酒店';
-    }
+    const hotel = combinedHotels.find(h => h._id === booking.hotelId);
+    return hotel?.name || (booking.hotelSource === 'local' ? '本地酒店' : '外部酒店');
   };
 
   return (
@@ -188,37 +160,20 @@ const Booking: React.FC = () => {
 
       {message && <div className="alert alert-info">{message}</div>}
 
-      <div className="mb-3">
-        <input
-          type="text"
-          placeholder="輸入外部酒店搜尋關鍵字"
-          value={searchKeyword}
-          onChange={(e) => setSearchKeyword(e.target.value)}
-          className="form-control"
-          disabled={isSearching}
-        />
-        <button
-          onClick={searchExternalHotels}
-          disabled={isSearching || !searchKeyword.trim()}
-          className="btn btn-primary mt-2"
-        >
-          {isSearching ? '搜尋中...' : '搜尋外部酒店'}
-        </button>
-      </div>
-
       <div className="card p-3 mb-4">
         <h5>新增預約</h5>
+
         <div className="mb-2">
           <label>選擇酒店</label>
           <select
             className="form-select"
-            value={selectedHotelId ? `${selectedHotelId}|${selectedHotelSource}` : ''}
+            value={selectedHotelId}
             onChange={handleHotelChange}
           >
             <option value="">-- 請選擇 --</option>
             {combinedHotels.map((h) => (
-              <option key={`${h.source}-${h._id}`} value={`${h._id}|${h.source}`}>
-                {h.name} {h.source === 'local' ? '(本地)' : '(外部)'}
+              <option key={h._id} value={h._id}>
+                {h.name} ({h.source === 'local' ? '本地' : '外部'})
               </option>
             ))}
           </select>
@@ -256,8 +211,8 @@ const Booking: React.FC = () => {
 
       <h5>預約紀錄</h5>
       <ul className="list-group">
-        {sortedBookings.length === 0 && <li className="list-group-item">尚無預約紀錄</li>}
-        {sortedBookings.map((b) => (
+        {myBookings.length === 0 && <li className="list-group-item">尚無預約紀錄</li>}
+        {myBookings.map((b) => (
           <li key={b._id} className="list-group-item d-flex justify-content-between align-items-center">
             <div>
               <p><strong>用戶名稱：</strong>{b.user?.username ?? '未知用戶'}</p>
