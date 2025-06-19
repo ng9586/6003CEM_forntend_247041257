@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useUser } from '../../contexts/UserContext';
 import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
+import { Card, Button, Image, OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 interface Hotel {
   _id: string;
@@ -28,26 +29,24 @@ const LocalHotelCard: React.FC<Props> = ({ hotel, onFavoriteChange }) => {
   const [isFavorited, setIsFavorited] = useState(false);
 
   useEffect(() => {
-    // 根據 Context 中的 profile.favoritedHotels 來判斷當前酒店是否被收藏
     if (profile?.favoritedHotels) {
-      // 確保 favoritedHotels 裡的元素是物件，並且取其 _id
       const favoriteIds = profile.favoritedHotels.map(fav => (typeof fav === 'string' ? fav : fav._id));
       setIsFavorited(favoriteIds.includes(hotel._id));
     } else {
       setIsFavorited(false);
     }
-  }, [profile, hotel._id]); // 依賴 profile 變化以更新收藏狀態
+  }, [profile, hotel._id]);
 
   const imageUrl = hotel.imageFilename
     ? `${IMAGE_BASE_URL}/uploads/${hotel.imageFilename}?t=${Date.now()}`
-    : 'https://dummyimage.com/40x40/cccccc/ffffff&text=No+Image';
+    : 'https://dummyimage.com/220x120/cccccc/ffffff&text=No+Image';
 
   const handleClick = () => {
     navigate(`/localHotels/${hotel._id}`);
   };
 
   const handleFavoriteToggle = async (e: React.MouseEvent) => {
-    e.stopPropagation(); // 阻止事件冒泡到父級的 handleClick
+    e.stopPropagation();
 
     const token = localStorage.getItem('token');
     if (!token) {
@@ -56,39 +55,31 @@ const LocalHotelCard: React.FC<Props> = ({ hotel, onFavoriteChange }) => {
       return;
     }
 
-    // 樂觀更新 UI：先改變心心狀態
     const newFavoritedState = !isFavorited;
     setIsFavorited(newFavoritedState);
     onFavoriteChange?.(hotel._id, newFavoritedState);
 
     try {
       if (newFavoritedState) {
-        // 新增收藏
         const res = await axios.post(
           `${API_BASE}/users/me/favorites`,
           { hotelId: hotel._id },
           { headers: { Authorization: `Bearer ${token}` } }
         );
         alert('已加入收藏！');
-        // 成功後，用後端回傳的最新收藏列表更新 Context
         if (res.data?.favoritedHotels) {
-          console.log('LocalHotelCard: 新增收藏成功，後端回傳收藏列表:', res.data.favoritedHotels); // DEBUG LOG
           updateFavoritedHotels && updateFavoritedHotels(res.data.favoritedHotels);
         }
       } else {
-        // 移除收藏
         const res = await axios.delete(`${API_BASE}/users/me/favorites/${hotel._id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         alert('已從收藏中移除！');
-        // 成功後，用後端回傳的最新收藏列表更新 Context
         if (res.data?.favoritedHotels) {
-          console.log('LocalHotelCard: 移除收藏成功，後端回傳收藏列表:', res.data.favoritedHotels); // DEBUG LOG
           updateFavoritedHotels && updateFavoritedHotels(res.data.favoritedHotels);
         }
       }
     } catch (error: any) {
-      // API 失敗時，回復心心狀態
       alert(error.response?.data?.message || '操作失敗，請稍後再試');
       setIsFavorited(!newFavoritedState);
       onFavoriteChange?.(hotel._id, !newFavoritedState);
@@ -96,54 +87,60 @@ const LocalHotelCard: React.FC<Props> = ({ hotel, onFavoriteChange }) => {
   };
 
   return (
-    <div
-      style={{
-        cursor: 'pointer',
-        border: '1px solid #e0e0e0',
-        borderRadius: 8,
-        width: 220,
-        padding: 12,
-        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
+    <Card
       onClick={handleClick}
+      style={{ width: 220, cursor: 'pointer', borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+      className="position-relative"
+      role="button"
+      tabIndex={0}
+      onKeyPress={(e) => { if (e.key === 'Enter') handleClick(); }}
     >
-      <img
+      <Card.Img
+        variant="top"
+        as={Image}
         src={imageUrl}
         alt={hotel.name}
-        style={{ width: '100%', height: 120, objectFit: 'cover', borderRadius: 4, marginBottom: 8 }}
+        style={{ height: 120, objectFit: 'cover', borderTopLeftRadius: 12, borderTopRightRadius: 12 }}
+        loading="lazy"
       />
-      <h3 style={{ fontSize: 18, margin: '0 0 4px 0', color: '#333' }}>{hotel.name}</h3>
-      <p style={{ fontSize: 14, color: '#666', margin: '0 0 4px 0' }}>{hotel.location}</p>
-      <p style={{ fontSize: 16, color: '#007bff', fontWeight: 'bold', margin: 0 }}>價格: ${hotel.price}</p>
+      <Card.Body className="d-flex flex-column justify-content-between p-3">
+        <div>
+          <Card.Title className="mb-1" style={{ fontSize: 18, color: '#333' }}>{hotel.name}</Card.Title>
+          <Card.Text className="mb-1 text-muted" style={{ fontSize: 14 }}>{hotel.location}</Card.Text>
+          <Card.Text className="mb-0 fw-bold text-primary" style={{ fontSize: 16 }}>價格: ${hotel.price}</Card.Text>
+        </div>
+      </Card.Body>
 
-      <div
-        onClick={handleFavoriteToggle}
-        style={{
-          position: 'absolute',
-          top: 8,
-          right: 8,
-          cursor: 'pointer',
-          backgroundColor: 'rgba(255,255,255,0.8)',
-          borderRadius: '50%',
-          padding: 4,
-          zIndex: 10,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
+      <OverlayTrigger
+        placement="top"
+        overlay={<Tooltip>{isFavorited ? '取消收藏' : '加入收藏'}</Tooltip>}
       >
-        {isFavorited ? (
-          <AiFillHeart size={24} color="#ff69b4" />
-        ) : (
-          <AiOutlineHeart size={24} color="#ccc" />
-        )}
-      </div>
-    </div>
+        <Button
+          variant="light"
+          onClick={handleFavoriteToggle}
+          className="position-absolute"
+          style={{
+            top: 8,
+            right: 8,
+            borderRadius: '50%',
+            padding: 6,
+            boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+            minWidth: 36,
+            minHeight: 36,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          aria-label={isFavorited ? '取消收藏' : '加入收藏'}
+        >
+          {isFavorited ? (
+            <AiFillHeart size={24} color="#ff69b4" />
+          ) : (
+            <AiOutlineHeart size={24} color="#aaa" />
+          )}
+        </Button>
+      </OverlayTrigger>
+    </Card>
   );
 };
 

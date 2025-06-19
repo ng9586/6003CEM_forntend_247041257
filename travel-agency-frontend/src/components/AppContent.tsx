@@ -49,31 +49,76 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>酒店搜尋平台</h1>
+    <div
+      style={{
+        padding: 20,
+        maxWidth: 1100,
+        margin: '0 auto',
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      }}
+    >
+      <h1
+        style={{
+          fontWeight: 700,
+          fontSize: '2.5rem',
+          color: '#004080',
+          marginBottom: 24,
+          textAlign: 'center',
+          userSelect: 'none',
+        }}
+      >
+        酒店搜尋平台
+      </h1>
+
       <HotelSearchBar onSearch={fetchHotels} />
 
       {loading && (
-        <div style={{ margin: '20px 0' }}>
+        <div style={{ margin: '30px 0', textAlign: 'center' }}>
           <div
             style={{
               margin: 'auto',
-              border: '4px solid #f3f3f3',
-              borderTop: '4px solid #3498db',
+              border: '5px solid #f3f3f3',
+              borderTop: '5px solid #004080',
               borderRadius: '50%',
-              width: 36,
-              height: 36,
+              width: 40,
+              height: 40,
               animation: 'spin 1s linear infinite',
             }}
+            aria-label="載入中"
           />
         </div>
       )}
 
-      {error && <p style={{ color: 'red' }}>錯誤：{error}</p>}
+      {error && (
+        <p
+          style={{
+            color: '#d9534f',
+            fontWeight: 600,
+            fontSize: 16,
+            marginTop: 20,
+            textAlign: 'center',
+            userSelect: 'none',
+          }}
+          role="alert"
+        >
+          錯誤：{error}
+        </p>
+      )}
 
       {!loading && !error && hotels.length > 0 && <HotelList hotels={hotels} />}
+
       {!loading && !error && hotels.length === 0 && (
-        <p style={{ color: '#555' }}>請輸入搜尋條件後再搜尋酒店。</p>
+        <p
+          style={{
+            color: '#666',
+            fontSize: 18,
+            marginTop: 40,
+            textAlign: 'center',
+            userSelect: 'none',
+          }}
+        >
+          請輸入搜尋條件後再搜尋酒店。
+        </p>
       )}
 
       <style>{`

@@ -26,16 +26,42 @@ const HotelSearchBar: React.FC<HotelSearchBarProps> = ({ onSearch }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      style={{ marginBottom: 20, display: 'flex', gap: 12, alignItems: 'center' }}
+      style={{
+        marginBottom: 24,
+        display: 'flex',
+        gap: 16,
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      }}
     >
       <input
         type="text"
         placeholder="輸入城市名稱"
         value={city}
         onChange={(e) => setCity(e.target.value)}
-        style={{ padding: 8, fontSize: 16, width: 150 }}
+        style={{
+          padding: '10px 14px',
+          fontSize: 16,
+          width: 180,
+          borderRadius: 8,
+          border: '1.5px solid #ccc',
+          transition: 'border-color 0.3s',
+        }}
+        onFocus={(e) => (e.currentTarget.style.borderColor = '#004080')}
+        onBlur={(e) => (e.currentTarget.style.borderColor = '#ccc')}
       />
-      <label style={{ fontSize: 14 }}>
+      <label
+        style={{
+          fontSize: 14,
+          color: '#444',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          userSelect: 'none',
+        }}
+      >
         入住:
         <input
           type="date"
@@ -45,27 +71,68 @@ const HotelSearchBar: React.FC<HotelSearchBarProps> = ({ onSearch }) => {
             const value = e.target.value;
             setCheckIn(value);
 
-            // 自動調整退房日
             if (new Date(checkOut) <= new Date(value)) {
               const nextDay = new Date(value);
               nextDay.setDate(nextDay.getDate() + 1);
               setCheckOut(nextDay.toISOString().split('T')[0]);
             }
           }}
-          style={{ padding: 8, fontSize: 16, marginLeft: 4 }}
+          style={{
+            padding: '8px 12px',
+            fontSize: 16,
+            borderRadius: 8,
+            border: '1.5px solid #ccc',
+            transition: 'border-color 0.3s',
+          }}
+          onFocus={(e) => (e.currentTarget.style.borderColor = '#004080')}
+          onBlur={(e) => (e.currentTarget.style.borderColor = '#ccc')}
         />
       </label>
-      <label style={{ fontSize: 14 }}>
+      <label
+        style={{
+          fontSize: 14,
+          color: '#444',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          userSelect: 'none',
+        }}
+      >
         退房:
         <input
           type="date"
           min={checkIn}
           value={checkOut}
           onChange={(e) => setCheckOut(e.target.value)}
-          style={{ padding: 8, fontSize: 16, marginLeft: 4 }}
+          style={{
+            padding: '8px 12px',
+            fontSize: 16,
+            borderRadius: 8,
+            border: '1.5px solid #ccc',
+            transition: 'border-color 0.3s',
+          }}
+          onFocus={(e) => (e.currentTarget.style.borderColor = '#004080')}
+          onBlur={(e) => (e.currentTarget.style.borderColor = '#ccc')}
         />
       </label>
-      <button type="submit" style={{ padding: '8px 16px', fontSize: 16 }}>
+      <button
+        type="submit"
+        style={{
+          padding: '10px 28px',
+          fontSize: 16,
+          background: 'linear-gradient(45deg, #004080, #00264d)',
+          color: '#fff',
+          border: 'none',
+          borderRadius: 8,
+          fontWeight: 600,
+          cursor: 'pointer',
+          boxShadow: '0 4px 12px rgba(0,64,128,0.6)',
+          transition: 'background-color 0.3s',
+          userSelect: 'none',
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.background = '#00264d')}
+        onMouseLeave={(e) => (e.currentTarget.style.background = 'linear-gradient(45deg, #004080, #00264d)')}
+      >
         搜尋
       </button>
     </form>

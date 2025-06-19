@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { Container, Card, Form, Button, Alert, ListGroup, Spinner } from 'react-bootstrap';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
@@ -32,12 +33,13 @@ const predefinedExternalHotels: Hotel[] = [
 const Booking: React.FC = () => {
   const [localHotels, setLocalHotels] = useState<Hotel[]>([]);
   const [myBookings, setMyBookings] = useState<Booking[]>([]);
-
   const [selectedHotelId, setSelectedHotelId] = useState('');
   const [checkInDate, setCheckInDate] = useState('');
   const [stayDays, setStayDays] = useState(1);
-
   const [message, setMessage] = useState<string | null>(null);
+  const [loadingHotels, setLoadingHotels] = useState(false);
+  const [loadingBookings, setLoadingBookings] = useState(false);
+  const [bookingProcessing, setBookingProcessing] = useState(false);
 
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
@@ -48,30 +50,30 @@ const Booking: React.FC = () => {
       return;
     }
 
+    setLoadingHotels(true);
     axios.get(`${API_BASE}/localHotels`)
       .then(res => {
         const hotels = res.data.map((h: any) => ({ ...h, source: 'local' as const }));
         setLocalHotels(hotels);
       })
-      .catch(() => setMessage('載入本地酒店列表失敗'));
+      .catch(() => setMessage('載入本地酒店列表失敗'))
+      .finally(() => setLoadingHotels(false));
 
     fetchMyBookings();
   }, [token]);
 
   const fetchMyBookings = () => {
     if (!token) return;
+    setLoadingBookings(true);
     axios.get(`${API_BASE}/bookings/my`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => setMyBookings(res.data))
-      .catch(() => setMessage('載入預約紀錄失敗'));
+      .catch(() => setMessage('載入預約紀錄失敗'))
+      .finally(() => setLoadingBookings(false));
   };
 
   const combinedHotels = [...localHotels, ...predefinedExternalHotels];
-
-  const handleHotelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedHotelId(e.target.value);
-  };
 
   const handleBooking = async () => {
     if (!token) {
@@ -101,6 +103,7 @@ const Booking: React.FC = () => {
       return;
     }
 
+    setBookingProcessing(true);
     try {
       const res = await axios.post(
         `${API_BASE}/bookings`,
@@ -127,6 +130,8 @@ const Booking: React.FC = () => {
       } else {
         setMessage('預約失敗，請稍後再試');
       }
+    } finally {
+      setBookingProcessing(false);
     }
   };
 
@@ -155,82 +160,111 @@ const Booking: React.FC = () => {
   };
 
   return (
-    <div className="container mt-4">
-      <h2>📅 酒店預約</h2>
+    <Container className="mt-4" style={{ maxWidth: 720, fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}>
+      <h2 className="mb-4" style={{ color: '#004080', fontWeight: '700' }}>📅 酒店預約</h2>
 
-      {message && <div className="alert alert-info">{message}</div>}
+      {message && (
+        <Alert variant="info" onClose={() => setMessage(null)} dismissible style={{ fontWeight: '600' }}>
+          {message}
+        </Alert>
+      )}
 
-      <div className="card p-3 mb-4">
-        <h5>新增預約</h5>
+      <Card className="mb-4 p-4 shadow rounded">
+        <h5 className="mb-3" style={{ color: '#004080', fontWeight: '600' }}>新增預約</h5>
 
-        <div className="mb-2">
-          <label>選擇酒店</label>
-          <select
-            className="form-select"
-            value={selectedHotelId}
-            onChange={handleHotelChange}
+        <Form>
+          <Form.Group className="mb-3" controlId="hotelSelect">
+            <Form.Label>選擇酒店</Form.Label>
+            {loadingHotels ? (
+              <div className="d-flex align-items-center gap-2">
+                <Spinner animation="border" size="sm" />
+                <span>載入中...</span>
+              </div>
+            ) : (
+              <Form.Select
+                value={selectedHotelId}
+                onChange={(e) => setSelectedHotelId(e.target.value)}
+                style={{ borderRadius: 6 }}
+              >
+                <option value="">-- 請選擇 --</option>
+                {combinedHotels.map((h) => (
+                  <option key={h._id} value={h._id}>
+                    {h.name} ({h.source === 'local' ? '本地' : '外部'})
+                  </option>
+                ))}
+              </Form.Select>
+            )}
+          </Form.Group>
+
+          <Form.Group className="mb-3" controlId="checkInDate">
+            <Form.Label>入住日期</Form.Label>
+            <Form.Control
+              type="date"
+              value={checkInDate}
+              onChange={(e) => setCheckInDate(e.target.value)}
+              style={{ borderRadius: 6 }}
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-4" controlId="stayDays">
+            <Form.Label>入住天數</Form.Label>
+            <Form.Control
+              type="number"
+              min={1}
+              value={stayDays}
+              onChange={(e) => setStayDays(Number(e.target.value))}
+              style={{ borderRadius: 6 }}
+            />
+          </Form.Group>
+
+          <Button
+            variant="success"
+            onClick={handleBooking}
+            disabled={!selectedHotelId || !checkInDate || stayDays <= 0 || bookingProcessing}
+            style={{ fontWeight: '600' }}
           >
-            <option value="">-- 請選擇 --</option>
-            {combinedHotels.map((h) => (
-              <option key={h._id} value={h._id}>
-                {h.name} ({h.source === 'local' ? '本地' : '外部'})
-              </option>
-            ))}
-          </select>
+            {bookingProcessing ? '預約中...' : '預約'}
+          </Button>
+        </Form>
+      </Card>
+
+      <h5 style={{ color: '#004080', fontWeight: '600', marginBottom: 16 }}>預約紀錄</h5>
+      {loadingBookings ? (
+        <div className="d-flex justify-content-center my-4">
+          <Spinner animation="border" />
         </div>
-
-        <div className="mb-2">
-          <label>入住日期</label>
-          <input
-            type="date"
-            className="form-control"
-            value={checkInDate}
-            onChange={(e) => setCheckInDate(e.target.value)}
-          />
-        </div>
-
-        <div className="mb-2">
-          <label>入住天數</label>
-          <input
-            type="number"
-            min={1}
-            className="form-control"
-            value={stayDays}
-            onChange={(e) => setStayDays(Number(e.target.value))}
-          />
-        </div>
-
-        <button
-          className="btn btn-success mt-2"
-          onClick={handleBooking}
-          disabled={!selectedHotelId || !checkInDate || stayDays <= 0}
-        >
-          預約
-        </button>
-      </div>
-
-      <h5>預約紀錄</h5>
-      <ul className="list-group">
-        {myBookings.length === 0 && <li className="list-group-item">尚無預約紀錄</li>}
-        {myBookings.map((b) => (
-          <li key={b._id} className="list-group-item d-flex justify-content-between align-items-center">
-            <div>
-              <p><strong>用戶名稱：</strong>{b.user?.username ?? '未知用戶'}</p>
-              <p><strong>酒店：</strong>{getHotelName(b)}</p>
-              <p><strong>入住日：</strong>{b.checkInDate ? new Date(b.checkInDate).toLocaleDateString() : '無資料'}</p>
-              <p><strong>退房日：</strong>{b.checkOutDate ? new Date(b.checkOutDate).toLocaleDateString() : '無資料'}</p>
-              <p><strong>入住天數：</strong>{b.stayDays ?? '無資料'} 天</p>
-            </div>
-            <button
-              className="btn btn-danger btn-sm"
-              onClick={() => handleDeleteBooking(b._id)}
+      ) : (
+        <ListGroup>
+          {myBookings.length === 0 && (
+            <ListGroup.Item className="text-center text-muted py-4" style={{ userSelect: 'none' }}>
+              尚無預約紀錄
+            </ListGroup.Item>
+          )}
+          {myBookings.map((b) => (
+            <ListGroup.Item
+              key={b._id}
+              className="d-flex justify-content-between align-items-start flex-column flex-md-row"
             >
-              刪除
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
+              <div>
+                <p className="mb-1"><strong>用戶名稱：</strong>{b.user?.username ?? '未知用戶'}</p>
+                <p className="mb-1"><strong>酒店：</strong>{getHotelName(b)}</p>
+                <p className="mb-1"><strong>入住日：</strong>{b.checkInDate ? new Date(b.checkInDate).toLocaleDateString() : '無資料'}</p>
+                <p className="mb-1"><strong>退房日：</strong>{b.checkOutDate ? new Date(b.checkOutDate).toLocaleDateString() : '無資料'}</p>
+                <p className="mb-0"><strong>入住天數：</strong>{b.stayDays ?? '無資料'} 天</p>
+              </div>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => handleDeleteBooking(b._id)}
+                className="mt-3 mt-md-0"
+              >
+                刪除
+              </Button>
+            </ListGroup.Item>
+          ))}
+        </ListGroup>
+      )}
+    </Container>
   );
 };
 

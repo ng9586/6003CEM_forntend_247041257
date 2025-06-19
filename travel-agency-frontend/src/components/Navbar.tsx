@@ -18,28 +18,57 @@ const AppNavbar: React.FC = () => {
   };
 
   return (
-    <Navbar bg="dark" variant="dark" expand="lg">
+    <Navbar bg="dark" variant="dark" expand="lg" sticky="top" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
       <Container>
-        <Navbar.Brand as={Link} to="/">Travel Agency</Navbar.Brand>
+        <Navbar.Brand
+          as={Link}
+          to="/"
+          style={{
+            fontWeight: '700',
+            fontSize: '1.8rem',
+            letterSpacing: '1.2px',
+            color: '#00aaff',
+            userSelect: 'none',
+          }}
+        >
+          Travel Agency
+        </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="ms-auto align-items-center">
+          <Nav className="ms-auto align-items-center" style={{ gap: '1rem' }}>
             {!token ? (
               <>
-                <Nav.Link as={Link} to="/login">登入</Nav.Link>
-                <Nav.Link as={Link} to="/register">註冊</Nav.Link>
+                <Nav.Link as={Link} to="/login" className="px-3">
+                  登入
+                </Nav.Link>
+                <Nav.Link as={Link} to="/register" className="px-3">
+                  註冊
+                </Nav.Link>
               </>
             ) : (
               <>
-                <Nav.Link as={Link} to="/">酒店搜尋</Nav.Link>
-                <Nav.Link as={Link} to="/localHotels">酒店清單</Nav.Link>
-                <Nav.Link as={Link} to="/bookings">酒店預約</Nav.Link>
-                {/* 新增收藏頁面連結 */}
-                <Nav.Link as={Link} to="/favorites">收藏</Nav.Link>
-                <Nav.Link as={Link} to="/profile">個人資料</Nav.Link>
-                {role === 'operator' && <Nav.Link as={Link} to="/dashboard">營運管理</Nav.Link>}
+                <Nav.Link as={Link} to="/" className="px-3">
+                  酒店搜尋
+                </Nav.Link>
+                <Nav.Link as={Link} to="/localHotels" className="px-3">
+                  酒店清單
+                </Nav.Link>
+                <Nav.Link as={Link} to="/bookings" className="px-3">
+                  酒店預約
+                </Nav.Link>
+                <Nav.Link as={Link} to="/favorites" className="px-3">
+                  收藏
+                </Nav.Link>
+                <Nav.Link as={Link} to="/profile" className="px-3">
+                  個人資料
+                </Nav.Link>
+                {role === 'operator' && (
+                  <Nav.Link as={Link} to="/dashboard" className="px-3">
+                    營運管理
+                  </Nav.Link>
+                )}
                 {profile && (
-                  <div className="d-flex align-items-center mx-2">
+                  <div className="d-flex align-items-center mx-3" style={{ userSelect: 'none' }}>
                     <Image
                       src={
                         profile.avatarUrl
@@ -50,12 +79,37 @@ const AppNavbar: React.FC = () => {
                       roundedCircle
                       width={40}
                       height={40}
-                      style={{ objectFit: 'cover' }}
+                      style={{ objectFit: 'cover', boxShadow: '0 0 6px rgba(0,0,0,0.3)' }}
                     />
-                    <span className="text-white ms-2">{profile.username}</span>
+                    <span
+                      className="text-white ms-2"
+                      style={{ fontWeight: 600, fontSize: '1rem', whiteSpace: 'nowrap' }}
+                    >
+                      {profile.username}
+                    </span>
                   </div>
                 )}
-                <Button variant="outline-light" className="ms-2" onClick={handleLogout}>登出</Button>
+                <Button
+                  variant="outline-light"
+                  className="ms-2"
+                  onClick={handleLogout}
+                  style={{
+                    borderWidth: 1.5,
+                    fontWeight: 600,
+                    padding: '4px 14px',
+                    transition: 'background-color 0.3s, color 0.3s',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.backgroundColor = '#00aaff';
+                    e.currentTarget.style.color = '#fff';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = '#fff';
+                  }}
+                >
+                  登出
+                </Button>
               </>
             )}
           </Nav>

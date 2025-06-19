@@ -3,6 +3,14 @@ import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import StarRating from '../../components/StarRating';
 
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
+import Card from 'react-bootstrap/Card';
+import Alert from 'react-bootstrap/Alert';
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 const IMAGE_BASE = import.meta.env.VITE_IMAGE_BASE_URL || API_BASE;
 
@@ -32,12 +40,12 @@ const LocalHotelDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 預約相關
+  // Booking
   const [checkInDate, setCheckInDate] = useState('');
   const [stayDays, setStayDays] = useState(1);
   const [bookingMessage, setBookingMessage] = useState<string | null>(null);
 
-  // 留言相關
+  // Reviews
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewsError, setReviewsError] = useState<string | null>(null);
@@ -47,10 +55,8 @@ const LocalHotelDetail: React.FC = () => {
   const [reviewMessage, setReviewMessage] = useState<string | null>(null);
   const [reviewLoading, setReviewLoading] = useState(false);
 
-  // 取得登入用戶 userId (假設存在 localStorage)
   const currentUserId = localStorage.getItem('userId') || '';
 
-  // 取得酒店資料
   useEffect(() => {
     if (!id) {
       setError('找不到酒店ID');
@@ -68,7 +74,6 @@ const LocalHotelDetail: React.FC = () => {
       .finally(() => setLoading(false));
   }, [id]);
 
-  // 取得評論列表
   const fetchReviews = () => {
     if (!id) return;
     setReviewsLoading(true);
@@ -84,7 +89,6 @@ const LocalHotelDetail: React.FC = () => {
     fetchReviews();
   }, [id]);
 
-  // 預約
   const handleBooking = () => {
     if (!hotel) return;
     if (!checkInDate) {
@@ -120,7 +124,6 @@ const LocalHotelDetail: React.FC = () => {
       .catch(() => setBookingMessage('預約失敗，請稍後再試'));
   };
 
-  // 新增留言
   const handleSubmitReview = () => {
     if (!comment.trim()) {
       setReviewMessage('請輸入留言內容');
@@ -157,7 +160,6 @@ const LocalHotelDetail: React.FC = () => {
       .finally(() => setReviewLoading(false));
   };
 
-  // 刪除留言
   const handleDeleteReview = async (reviewId: string) => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -176,11 +178,27 @@ const LocalHotelDetail: React.FC = () => {
     }
   };
 
-  if (loading) return <p style={styles.loading}>載入中...</p>;
-  if (error) return <p style={styles.error}>{error}</p>;
-  if (!hotel) return <p style={styles.error}>找不到酒店資料</p>;
+  if (loading)
+    return (
+      <Container className="text-center my-5">
+        <p>載入中...</p>
+      </Container>
+    );
 
-  // 圖片陣列處理
+  if (error)
+    return (
+      <Container className="text-center my-5">
+        <Alert variant="danger">{error}</Alert>
+      </Container>
+    );
+
+  if (!hotel)
+    return (
+      <Container className="text-center my-5">
+        <Alert variant="danger">找不到酒店資料</Alert>
+      </Container>
+    );
+
   const imageUrls =
     hotel.images && hotel.images.length > 0
       ? hotel.images.map((img) => `${IMAGE_BASE}/uploads/${img}?t=${Date.now()}`)
@@ -189,230 +207,139 @@ const LocalHotelDetail: React.FC = () => {
       : [];
 
   return (
-    <div style={styles.container}>
-      <button style={styles.backButton} onClick={() => navigate(-1)}>
+    <Container className="my-4">
+      <Button variant="secondary" onClick={() => navigate(-1)} className="mb-3">
         ← 返回
-      </button>
+      </Button>
 
-      <h2 style={styles.title}>{hotel.name}</h2>
-      <p style={styles.text}>
-        <strong>地點：</strong>
-        {hotel.location}
+      <h2 className="mb-3">{hotel.name}</h2>
+      <p>
+        <strong>地點：</strong> {hotel.location}
       </p>
-      <p style={styles.text}>
-        <strong>價格：</strong>${hotel.price}
+      <p>
+        <strong>價格：</strong> ${hotel.price}
       </p>
       {hotel.description && (
-        <p style={styles.text}>
-          <strong>描述：</strong>
-          {hotel.description}
+        <p>
+          <strong>描述：</strong> {hotel.description}
         </p>
       )}
 
       {imageUrls.length > 0 && (
-        <div style={styles.imageContainer}>
+        <Row className="mb-4">
           {imageUrls.map((url, idx) => (
-            <img key={idx} src={url} alt={`圖片${idx + 1}`} style={styles.image} loading="lazy" />
+            <Col xs={12} md={6} lg={4} key={idx} className="mb-3">
+              <Card>
+                <Card.Img variant="top" src={url} alt={`圖片${idx + 1}`} loading="lazy" />
+              </Card>
+            </Col>
           ))}
-        </div>
+        </Row>
       )}
 
       {/* 預約區 */}
-      <section style={styles.bookingSection}>
-        <h3>預約入住</h3>
-        <label>
-          入住日期：
-          <input
-            type="date"
-            value={checkInDate}
-            onChange={(e) => setCheckInDate(e.target.value)}
-            style={styles.input}
-          />
-        </label>
-        <label>
-          入住天數：
-          <input
-            type="number"
-            min={1}
-            value={stayDays}
-            onChange={(e) => setStayDays(Number(e.target.value))}
-            style={styles.input}
-          />
-        </label>
-        <button onClick={handleBooking} style={styles.button}>
-          預約
-        </button>
-        {bookingMessage && <p style={styles.message}>{bookingMessage}</p>}
-      </section>
+      <Card className="mb-5" style={{ maxWidth: 400 }}>
+        <Card.Body>
+          <Card.Title>預約入住</Card.Title>
+          <Form.Group className="mb-3" controlId="checkInDate">
+            <Form.Label>入住日期</Form.Label>
+            <Form.Control
+              type="date"
+              value={checkInDate}
+              onChange={(e) => setCheckInDate(e.target.value)}
+            />
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="stayDays">
+            <Form.Label>入住天數</Form.Label>
+            <Form.Control
+              type="number"
+              min={1}
+              value={stayDays}
+              onChange={(e) => setStayDays(Number(e.target.value))}
+            />
+          </Form.Group>
+          <Button variant="primary" onClick={handleBooking} className="w-100">
+            預約
+          </Button>
+          {bookingMessage && (
+            <Alert
+              variant={bookingMessage.includes('成功') ? 'success' : 'danger'}
+              className="mt-3"
+            >
+              {bookingMessage}
+            </Alert>
+          )}
+        </Card.Body>
+      </Card>
 
       {/* 留言區 */}
-      <section style={styles.reviewSection}>
-        <h3>留言評論</h3>
+      <Card style={{ maxWidth: 700 }}>
+        <Card.Body>
+          <Card.Title>留言評論</Card.Title>
+          <Form.Group className="mb-3" controlId="comment">
+            <Form.Control
+              as="textarea"
+              rows={4}
+              placeholder="寫下你的評論..."
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              disabled={reviewLoading}
+            />
+          </Form.Group>
+          <Form.Group className="mb-3 d-flex align-items-center">
+            <Form.Label className="me-2 mb-0">評分：</Form.Label>
+            <StarRating rating={rating} onChange={setRating} size={28} />
+          </Form.Group>
+          <Button
+            variant="primary"
+            onClick={handleSubmitReview}
+            disabled={reviewLoading}
+            className="mb-3"
+          >
+            {reviewLoading ? '送出中...' : '送出留言'}
+          </Button>
+          {reviewMessage && (
+            <Alert
+              variant={reviewMessage.includes('成功') ? 'success' : 'danger'}
+              className="mb-3"
+            >
+              {reviewMessage}
+            </Alert>
+          )}
 
-        {/* 新增留言 */}
-        <textarea
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          placeholder="寫下你的評論..."
-          rows={4}
-          style={styles.textarea}
-          disabled={reviewLoading}
-        />
-        <label style={{ marginTop: 8 }}>
-          評分：
-          <StarRating rating={rating} onChange={setRating} size={28} />
-        </label>
-        <button onClick={handleSubmitReview} disabled={reviewLoading} style={styles.button}>
-          {reviewLoading ? '送出中...' : '送出留言'}
-        </button>
-        {reviewMessage && (
-          <p style={{ ...styles.message, color: reviewMessage.includes('成功') ? 'green' : 'red' }}>
-            {reviewMessage}
-          </p>
-        )}
-
-        {/* 留言列表 */}
-        <div style={{ marginTop: 24 }}>
+          {/* 留言列表 */}
           {reviewsLoading && <p>載入評論中...</p>}
-          {reviewsError && <p style={{ color: 'red' }}>{reviewsError}</p>}
+          {reviewsError && <Alert variant="danger">{reviewsError}</Alert>}
           {!reviewsLoading && reviews.length === 0 && <p>尚無評論</p>}
 
           {reviews.map((r) => (
-            <div key={r._id} style={styles.reviewItem}>
-              <p style={styles.reviewHeader}>
-                <strong>{r.userId?.username || '匿名'}</strong> -{' '}
-                {new Date(r.createdAt).toLocaleDateString()}
-                {r.userId?._id === currentUserId && (
-                  <button
-                    style={styles.deleteButton}
-                    onClick={() => handleDeleteReview(r._id)}
-                    title="刪除留言"
-                  >
-                    刪除
-                  </button>
-                )}
-              </p>
-              <StarRating rating={r.rating} readOnly size={20} />
-              <p style={styles.reviewComment}>{r.comment}</p>
-            </div>
+            <Card key={r._id} className="mb-3">
+              <Card.Body>
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <strong>{r.userId?.username || '匿名'}</strong> -{' '}
+                    {new Date(r.createdAt).toLocaleDateString()}
+                  </div>
+                  {r.userId?._id === currentUserId && (
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => handleDeleteReview(r._id)}
+                      title="刪除留言"
+                    >
+                      刪除
+                    </Button>
+                  )}
+                </div>
+                <StarRating rating={r.rating} readOnly size={20} />
+                <Card.Text className="mt-2">{r.comment}</Card.Text>
+              </Card.Body>
+            </Card>
           ))}
-        </div>
-      </section>
-    </div>
+        </Card.Body>
+      </Card>
+    </Container>
   );
-};
-
-const styles: { [key: string]: React.CSSProperties } = {
-  container: {
-    maxWidth: 900,
-    margin: '0 auto',
-    padding: 24,
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-  },
-  backButton: {
-    marginBottom: 20,
-    padding: '6px 12px',
-    borderRadius: 4,
-    border: '1px solid #ccc',
-    backgroundColor: '#f0f0f0',
-    cursor: 'pointer',
-  },
-  title: {
-    fontSize: 28,
-    marginBottom: 8,
-  },
-  text: {
-    fontSize: 16,
-    marginBottom: 6,
-  },
-  imageContainer: {
-    display: 'flex',
-    gap: 12,
-    flexWrap: 'wrap',
-    marginTop: 16,
-  },
-  image: {
-    width: 240,
-    height: 160,
-    objectFit: 'cover',
-    borderRadius: 8,
-  },
-  bookingSection: {
-    marginTop: 32,
-    padding: 16,
-    border: '1px solid #ccc',
-    borderRadius: 8,
-    maxWidth: 320,
-  },
-  input: {
-    display: 'block',
-    width: '100%',
-    marginTop: 6,
-    marginBottom: 12,
-    padding: 6,
-    fontSize: 16,
-    borderRadius: 4,
-    border: '1px solid #ccc',
-  },
-  button: {
-    width: '100%',
-    padding: '10px 0',
-    backgroundColor: '#007bff',
-    border: 'none',
-    borderRadius: 6,
-    color: 'white',
-    fontSize: 16,
-    cursor: 'pointer',
-  },
-  message: {
-    marginTop: 12,
-    fontSize: 14,
-  },
-  reviewSection: {
-    marginTop: 40,
-    maxWidth: 600,
-  },
-  textarea: {
-    width: '100%',
-    padding: 8,
-    fontSize: 16,
-    borderRadius: 6,
-    border: '1px solid #ccc',
-    resize: 'vertical',
-  },
-  reviewItem: {
-    borderTop: '1px solid #ddd',
-    paddingTop: 12,
-    marginTop: 12,
-  },
-  reviewHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  deleteButton: {
-    marginLeft: 12,
-    backgroundColor: 'transparent',
-    border: 'none',
-    color: 'red',
-    cursor: 'pointer',
-    fontSize: 14,
-  },
-  reviewComment: {
-    marginTop: 6,
-    fontSize: 15,
-  },
-  loading: {
-    textAlign: 'center',
-    marginTop: 40,
-    fontSize: 18,
-  },
-  error: {
-    textAlign: 'center',
-    marginTop: 40,
-    fontSize: 18,
-    color: 'red',
-  },
 };
 
 export default LocalHotelDetail;

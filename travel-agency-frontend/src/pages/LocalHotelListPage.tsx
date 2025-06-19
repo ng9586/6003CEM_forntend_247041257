@@ -31,7 +31,6 @@ const LocalHotelListPage: React.FC = () => {
   useEffect(() => {
     let filtered = hotels;
 
-    // 文字搜尋過濾
     if (searchText.trim()) {
       const lowerSearch = searchText.toLowerCase();
       filtered = filtered.filter(
@@ -41,7 +40,6 @@ const LocalHotelListPage: React.FC = () => {
       );
     }
 
-    // 價格排序
     if (priceSort === 'asc') {
       filtered = filtered.slice().sort((a, b) => a.price - b.price);
     } else if (priceSort === 'desc') {
@@ -51,16 +49,16 @@ const LocalHotelListPage: React.FC = () => {
     setFilteredHotels(filtered);
   }, [searchText, priceSort, hotels]);
 
-  if (loading) return <p>載入中...</p>;
+  if (loading) return <p style={{ textAlign: 'center', marginTop: 40 }}>載入中...</p>;
 
   return (
-    <div style={{ padding: 20 }}>
+    <div style={{ padding: 20, maxWidth: 1100, margin: '0 auto', fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}>
       {/* 搜尋及排序區 */}
       <div
         style={{
-          marginBottom: 20,
+          marginBottom: 24,
           display: 'flex',
-          gap: 12,
+          gap: 16,
           flexWrap: 'wrap',
           alignItems: 'center',
           justifyContent: 'center',
@@ -71,13 +69,31 @@ const LocalHotelListPage: React.FC = () => {
           placeholder="搜尋酒店名稱或地點"
           value={searchText}
           onChange={e => setSearchText(e.target.value)}
-          style={{ padding: 8, width: 200, borderRadius: 4, border: '1px solid #ccc' }}
+          style={{
+            padding: '10px 14px',
+            width: 220,
+            borderRadius: 8,
+            border: '1.5px solid #ccc',
+            fontSize: 16,
+            transition: 'border-color 0.3s',
+          }}
+          onFocus={e => (e.currentTarget.style.borderColor = '#004080')}
+          onBlur={e => (e.currentTarget.style.borderColor = '#ccc')}
         />
 
         <select
           value={priceSort}
           onChange={e => setPriceSort(e.target.value as 'asc' | 'desc' | '')}
-          style={{ padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
+          style={{
+            padding: '10px 14px',
+            borderRadius: 8,
+            border: '1.5px solid #ccc',
+            fontSize: 16,
+            transition: 'border-color 0.3s',
+            cursor: 'pointer',
+          }}
+          onFocus={e => (e.currentTarget.style.borderColor = '#004080')}
+          onBlur={e => (e.currentTarget.style.borderColor = '#ccc')}
         >
           <option value="">價格排序</option>
           <option value="asc">價格由低到高</option>
@@ -90,22 +106,31 @@ const LocalHotelListPage: React.FC = () => {
             setPriceSort('');
           }}
           style={{
-            padding: '8px 16px',
-            backgroundColor: '#007bff',
+            padding: '10px 24px',
+            background: 'linear-gradient(45deg, #004080, #00264d)',
             color: '#fff',
             border: 'none',
-            borderRadius: 4,
+            borderRadius: 8,
+            fontWeight: 600,
             cursor: 'pointer',
+            boxShadow: '0 4px 12px rgba(0,64,128,0.6)',
+            transition: 'background-color 0.3s',
+            userSelect: 'none',
           }}
+          onMouseEnter={e => (e.currentTarget.style.background = '#00264d')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'linear-gradient(45deg, #004080, #00264d)')}
+          type="button"
         >
           清除篩選
         </button>
       </div>
 
       {/* 酒店列表 */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'center' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 28, justifyContent: 'center' }}>
         {filteredHotels.length === 0 ? (
-          <p style={{ color: '#666' }}>找不到符合條件的酒店。</p>
+          <p style={{ color: '#666', fontSize: 18, marginTop: 40, userSelect: 'none' }}>
+            找不到符合條件的酒店。
+          </p>
         ) : (
           filteredHotels.map(hotel => <LocalHotelCard key={hotel._id} hotel={hotel} />)
         )}
