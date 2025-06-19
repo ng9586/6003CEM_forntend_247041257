@@ -59,6 +59,9 @@ const AppNavbar: React.FC = () => {
                 <Nav.Link as={Link} to="/favorites" className="px-3">
                   收藏
                 </Nav.Link>
+                <Nav.Link as={Link} to="/flights" className="px-3">
+                  航班情況
+                </Nav.Link>
                 <Nav.Link as={Link} to="/profile" className="px-3">
                   個人資料
                 </Nav.Link>
