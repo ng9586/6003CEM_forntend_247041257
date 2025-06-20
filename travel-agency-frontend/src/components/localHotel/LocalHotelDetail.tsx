@@ -315,33 +315,35 @@ const LocalHotelDetail: React.FC = () => {
 
           {/* 留言列表 */}
           {reviewsLoading && <p>載入評論中...</p>}
-          {reviewsError && <Alert variant="danger">{reviewsError}</Alert>}
-          {!reviewsLoading && reviews.length === 0 && <p>尚無評論</p>}
+{reviewsError && <Alert variant="danger">{reviewsError}</Alert>}
+{!reviewsLoading && Array.isArray(reviews) && reviews.length === 0 && <p>尚無評論</p>}
 
-          {reviews.map((r) => (
-            <Card key={r._id} className="mb-3">
-              <Card.Body>
-                <div className="d-flex justify-content-between align-items-center">
-                  <div>
-                    <strong>{r.userId?.username || '匿名'}</strong> -{' '}
-                    {new Date(r.createdAt).toLocaleDateString()}
-                  </div>
-                  {r.userId?._id === currentUserId && (
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => handleDeleteReview(r._id)}
-                      title="刪除留言"
-                    >
-                      刪除
-                    </Button>
-                  )}
-                </div>
-                <StarRating rating={r.rating} readOnly size={20} />
-                <Card.Text className="mt-2">{r.comment}</Card.Text>
-              </Card.Body>
-            </Card>
-          ))}
+{Array.isArray(reviews) &&
+  reviews.map((r) => (
+    <Card key={r._id} className="mb-3">
+      <Card.Body>
+        <div className="d-flex justify-content-between align-items-center">
+          <div>
+            <strong>{r.userId?.username || '匿名'}</strong> -{' '}
+            {new Date(r.createdAt).toLocaleDateString()}
+          </div>
+          {r.userId?._id?.toString() === currentUserId && (
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => handleDeleteReview(r._id)}
+              title="刪除留言"
+            >
+              刪除
+            </Button>
+          )}
+        </div>
+        <StarRating rating={r.rating} readOnly size={20} />
+        <Card.Text className="mt-2">{r.comment}</Card.Text>
+      </Card.Body>
+    </Card>
+  ))}
+
         </Card.Body>
       </Card>
     </Container>
