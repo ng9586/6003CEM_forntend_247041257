@@ -84,7 +84,7 @@ const Register: React.FC = () => {
           <Form.Label>註冊代碼（SignUpCode）</Form.Label>
           <Form.Control
             type="text"
-            placeholder="例如：agency2025"
+            placeholder="例如：apples2025"
             value={signUpCode}
             onChange={(e) => setSignUpCode(e.target.value)}
             style={{ borderRadius: 8, fontSize: 16 }}
