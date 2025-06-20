@@ -125,40 +125,46 @@ const LocalHotelDetail: React.FC = () => {
   };
 
   const handleSubmitReview = () => {
-    if (!comment.trim()) {
-      setReviewMessage('請輸入留言內容');
-      return;
-    }
-    if (rating < 1 || rating > 5) {
-      setReviewMessage('評分必須介乎 1 至 5');
-      return;
-    }
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setReviewMessage('請先登入才能留言');
-      return;
-    }
+  if (!comment.trim()) {
+    setReviewMessage('請輸入留言內容');
+    return;
+  }
+  if (rating < 1 || rating > 5) {
+    setReviewMessage('評分必須介乎 1 至 5');
+    return;
+  }
+  const token = localStorage.getItem('token');
+  if (!token) {
+    setReviewMessage('請先登入才能留言');
+    return;
+  }
 
-    setReviewLoading(true);
-    setReviewMessage(null);
+  setReviewLoading(true);
+  setReviewMessage(null);
 
-    axios
-      .post(
-        `${API_BASE}/reviews`,
-        { hotelId: hotel?._id, comment, rating },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      .then(() => {
-        setReviewMessage('留言成功！謝謝你的評論');
-        setComment('');
-        setRating(5);
-        fetchReviews();
-      })
-      .catch((err) => {
-        setReviewMessage(err.response?.data?.message || '留言失敗，請稍後再試');
-      })
-      .finally(() => setReviewLoading(false));
-  };
+  axios
+    .post(
+      `${API_BASE}/reviews`,
+      {
+        hotelId: hotel?._id,
+        comment,
+        rating,
+        hotelSource: 'local', // ← 必加
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    .then(() => {
+      setReviewMessage('留言成功！謝謝你的評論');
+      setComment('');
+      setRating(5);
+      fetchReviews();
+    })
+    .catch((err) => {
+      setReviewMessage(err.response?.data?.message || '留言失敗，請稍後再試');
+    })
+    .finally(() => setReviewLoading(false));
+};
+
 
   const handleDeleteReview = async (reviewId: string) => {
     const token = localStorage.getItem('token');
