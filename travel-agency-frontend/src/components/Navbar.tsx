@@ -51,7 +51,7 @@ const AppNavbar: React.FC = () => {
                   Hotel Search
                 </Nav.Link>
                 <Nav.Link as={Link} to="/localHotels" className="px-3">
-                  Hotel Reservation
+                  Hotel List
                 </Nav.Link>
                 <Nav.Link as={Link} to="/bookings" className="px-3">
                   Hotel Reservation
