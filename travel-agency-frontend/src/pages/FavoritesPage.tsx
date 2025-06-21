@@ -44,7 +44,7 @@ const FavoritesPage: React.FC = () => {
           letterSpacing: '1px',
         }}
       >
-        ❤️ 我的收藏
+        ❤️ My Collection
       </h2>
 
       {favoritedHotels.length === 0 ? (
@@ -57,7 +57,7 @@ const FavoritesPage: React.FC = () => {
             userSelect: 'none',
           }}
         >
-          你還沒有收藏任何酒店！
+          You haven't saved any hotels yet!
         </p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

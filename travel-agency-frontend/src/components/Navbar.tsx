@@ -39,35 +39,35 @@ const AppNavbar: React.FC = () => {
             {!token ? (
               <>
                 <Nav.Link as={Link} to="/login" className="px-3">
-                  登入
+                  Login
                 </Nav.Link>
                 <Nav.Link as={Link} to="/register" className="px-3">
-                  註冊
+                  Register
                 </Nav.Link>
               </>
             ) : (
               <>
                 <Nav.Link as={Link} to="/" className="px-3">
-                  酒店搜尋
+                  Hotel Search
                 </Nav.Link>
                 <Nav.Link as={Link} to="/localHotels" className="px-3">
-                  酒店清單
+                  Hotel Reservation
                 </Nav.Link>
                 <Nav.Link as={Link} to="/bookings" className="px-3">
-                  酒店預約
+                  Hotel Reservation
                 </Nav.Link>
                 <Nav.Link as={Link} to="/favorites" className="px-3">
-                  收藏
+                  Collect
                 </Nav.Link>
                 <Nav.Link as={Link} to="/flights" className="px-3">
-                  航班情況
+                  Flight Status
                 </Nav.Link>
                 <Nav.Link as={Link} to="/profile" className="px-3">
-                  個人資料
+                  Profile
                 </Nav.Link>
                 {role === 'operator' && (
                   <Nav.Link as={Link} to="/dashboard" className="px-3">
-                    營運管理
+                    operations management
                   </Nav.Link>
                 )}
                 {profile && (
@@ -111,7 +111,7 @@ const AppNavbar: React.FC = () => {
                     e.currentTarget.style.color = '#fff';
                   }}
                 >
-                  登出
+                  Sign out
                 </Button>
               </>
             )}

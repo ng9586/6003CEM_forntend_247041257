@@ -67,7 +67,7 @@ const AppContent: React.FC = () => {
           userSelect: 'none',
         }}
       >
-        酒店搜尋平台
+        Hotel Search Platform
       </h1>
 
       <HotelSearchBar onSearch={fetchHotels} />
@@ -117,7 +117,7 @@ const AppContent: React.FC = () => {
             userSelect: 'none',
           }}
         >
-          請輸入搜尋條件後再搜尋酒店。
+          Please enter your search criteria before searching for hotels.
         </p>
       )}
 

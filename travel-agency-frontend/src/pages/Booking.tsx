@@ -161,7 +161,7 @@ const Booking: React.FC = () => {
 
   return (
     <Container className="mt-4" style={{ maxWidth: 720, fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}>
-      <h2 className="mb-4" style={{ color: '#004080', fontWeight: '700' }}>📅 酒店預約</h2>
+      <h2 className="mb-4" style={{ color: '#004080', fontWeight: '700' }}>📅 Hotel Reservation</h2>
 
       {message && (
         <Alert variant="info" onClose={() => setMessage(null)} dismissible style={{ fontWeight: '600' }}>
@@ -174,7 +174,7 @@ const Booking: React.FC = () => {
 
         <Form>
           <Form.Group className="mb-3" controlId="hotelSelect">
-            <Form.Label>選擇酒店</Form.Label>
+            <Form.Label>Select Hotel</Form.Label>
             {loadingHotels ? (
               <div className="d-flex align-items-center gap-2">
                 <Spinner animation="border" size="sm" />

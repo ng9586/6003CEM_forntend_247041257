@@ -196,7 +196,7 @@ const HotelDetail: React.FC = () => {
   return (
     <Container className="my-5">
       <Button variant="secondary" onClick={() => navigate(-1)} className="mb-3">
-        ← 返回
+        ← return
       </Button>
 
       <h2 className="mb-2 fw-bold text-primary">{hotel.name.content}</h2>

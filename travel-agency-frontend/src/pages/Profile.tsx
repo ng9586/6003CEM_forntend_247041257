@@ -133,7 +133,7 @@ const Profile: React.FC = () => {
 
   return (
     <Container className="mt-5" style={{ maxWidth: 720, fontFamily: "'Lato', sans-serif" }}>
-      <h2 className="mb-4 text-primary fw-bold">👤 個人資料</h2>
+      <h2 className="mb-4 text-primary fw-bold">👤 Personal</h2>
 
       <Card className="p-4 shadow rounded-4 border-0">
         {/* 頭像區 */}
@@ -180,7 +180,7 @@ const Profile: React.FC = () => {
               (e.currentTarget.style.background = 'linear-gradient(45deg, #004080, #00264d)')
             }
           >
-            更新用戶名
+            Update Username
           </Button>
         </Form.Group>
 
@@ -198,11 +198,11 @@ const Profile: React.FC = () => {
           onMouseEnter={(e) => (e.currentTarget.style.background = '#b68b00')}
           onMouseLeave={(e) => (e.currentTarget.style.background = 'linear-gradient(45deg, #d4af37, #b68b00)')}
         >
-          上傳頭像
+          Upload avatar
         </Button>
 
         {/* 用戶評論區 */}
-        <h3 className="mb-4 text-primary fw-bold">📝 我的評論</h3>
+        <h3 className="mb-4 text-primary fw-bold">📝 Comments</h3>
 
         {reviewsLoading && (
           <div className="text-center">
@@ -232,7 +232,7 @@ const Profile: React.FC = () => {
                     onClick={() => handleDeleteReview(r._id)}
                     title="刪除留言"
                   >
-                    刪除
+                    Delete
                   </Button>
                 </Col>
               </Row>

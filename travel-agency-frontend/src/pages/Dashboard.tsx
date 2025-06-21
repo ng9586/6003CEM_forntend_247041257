@@ -158,14 +158,14 @@ const Dashboard: React.FC = () => {
                     onClick={() => handleShowEdit(hotel)}
                     className="me-2"
                   >
-                    編輯
+                    Edit
                   </Button>
                   <Button
                     variant="danger"
                     size="sm"
                     onClick={() => handleDelete(hotel._id)}
                   >
-                    刪除
+                    Delete
                   </Button>
                 </td>
               </tr>

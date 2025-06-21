@@ -42,7 +42,7 @@ const Login: React.FC = () => {
         className="mb-4"
         style={{ fontWeight: '700', color: '#004080', textAlign: 'center', fontSize: '2rem' }}
       >
-        登入
+        Login
       </h2>
       {error && (
         <Alert variant="danger" className="mb-4" style={{ fontWeight: '600' }}>
@@ -65,7 +65,7 @@ const Login: React.FC = () => {
         </Form.Group>
 
         <Form.Group className="mb-4" controlId="formPassword">
-          <Form.Label>密碼</Form.Label>
+          <Form.Label>Password 密碼</Form.Label>
           <Form.Control
             type="password"
             placeholder="輸入密碼"
@@ -94,7 +94,7 @@ const Login: React.FC = () => {
           onMouseEnter={(e) => (e.currentTarget.style.background = '#00264d')}
           onMouseLeave={(e) => (e.currentTarget.style.background = 'linear-gradient(45deg, #004080, #00264d)')}
         >
-          登入
+          Login
         </Button>
       </Form>
     </Container>
